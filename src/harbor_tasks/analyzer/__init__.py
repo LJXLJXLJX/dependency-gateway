@@ -15,6 +15,7 @@ from .apt import (
     apt_dependencies,
     apt_repository_declarations,
 )
+from .conda import conda_install_context
 from .dockerfile import (
     discover_tasks,
     docker_instructions,
@@ -323,6 +324,17 @@ def analyze(dataset: Path, shell_scope: str) -> dict:
                         specs, requirement_files = argument_specs(install)
                         python_version = pip_python_version(install)
                         resolution_options = package_resolution_options(install)
+                        if install.manager == "conda":
+                            specs, resolution_options, pip_specs = conda_install_context(
+                                install, environment=environment, source=source,
+                                text=text, tokens=list(tokens), context=scan_context,
+                            )
+                            requirement_files = []
+                            for pip_spec in pip_specs:
+                                pip_package = normalize_package("pip", pip_spec)
+                                if pip_package:
+                                    record_package("pip", pip_package, pip_spec, None,
+                                                   scan_context, (), relative_source, {})
                         if install.manager == "npm" and not specs:
                             manifest_specs = select_generated_manifest(
                                 generated_package_json, cwd=current_directory

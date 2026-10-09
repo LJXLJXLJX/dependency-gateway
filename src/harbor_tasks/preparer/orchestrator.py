@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Sequence
 
 from .models import ProbeResult, ProbeSettings, WarmResult
-from .providers import AptProvider, NpmProvider, PipProvider
+from .providers import AptProvider, CondaProvider, NpmProvider, PipProvider
 from .providers.base import PackageProvider
 
 
@@ -15,7 +15,7 @@ def _providers(
     values = (
         list(configured)
         if configured is not None
-        else [AptProvider(), NpmProvider(), PipProvider()]
+        else [AptProvider(), CondaProvider(), NpmProvider(), PipProvider()]
     )
     return {provider.manager: provider for provider in values}
 

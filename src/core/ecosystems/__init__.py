@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from . import apt, cargo, dart, download, go, julia, node, pip
+from . import apt, cargo, conda, dart, download, go, julia, node, pip
 from .base import EcosystemHandler
 
 if TYPE_CHECKING:
@@ -21,6 +21,7 @@ _HANDLERS = (
     node.HANDLER,
     go.HANDLER,
     cargo.HANDLER,
+    conda.HANDLER,
     dart.HANDLER,
     julia.HANDLER,
     download.HANDLER,

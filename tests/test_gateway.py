@@ -466,6 +466,8 @@ class ConfigTest(unittest.TestCase):
                 "go-sumdb": "2026-09-15",
                 "npm-registry": "2026-09-15",
                 "pytorch": "2026-09-09",
+                "conda-defaults": "2026-10-09",
+                "conda-channels": "2026-10-09",
             }.get(source.name, "2026-09-07")
             self.assertEqual(source.config_updated_at, expected_updated_at)
             self.assertEqual(source.config_update_policy, "manual")

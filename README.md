@@ -9,11 +9,17 @@ The project also ships dataset-analysis tooling that discovers the public base i
 package dependencies, direct downloads and GitHub repositories for image prebuilds, and
 produces reviewable, executable preparation plans.
 
+Conda preparation jointly resolves declared package specs with a preloaded micromamba
+image, probes transitive dependencies, and verifies package checksums and Gateway HITs
+during warm-up. Configure `DEPENDENCY_GATEWAY_CONDA_RESOLVER_IMAGE` as described in the
+[dataset preparation guide](docs/dataset-preparation.md#conda-preparation).
+
 ## Capabilities at a glance
 
 | Scenario | Client entry point | Cache location | Runtime admission |
 | --- | --- | --- | --- |
 | Configured package-manager source | `/v1/cache/<source>/...` | S3 | source protocol and path policy |
+| Conda defaults / conda-forge (`linux-64`, `noarch`) | `/v1/cache/conda-defaults/...`, `/v1/cache/conda-channels/...` | S3, subject to cache mode | Traditional repodata and package-file allowlist |
 | prebuild APT | `/v1/cache/apt/v1/...` | S3 | Derived from the repository URI; no source or map required |
 | prebuild `curl` / `wget` GET | `/v1/cache/download/v1/...` | S3 | Unseen URLs are fetched on demand from origin; no origin/path registration required |
 | Public GitHub clone | `/v1/git/github/<owner>/<repo>[.git]` | Persistent filesystem | GitHub-only protocol constraint; repository plan not checked |
@@ -189,7 +195,7 @@ disguised as a source and never back-filled by guessing.
 
 ## Documentation
 
-- [User guide](docs/user-guide.md): how to point pip, APT, npm, Go, Cargo, Rustup, Git and
+- [User guide](docs/user-guide.md): how to point pip, conda, APT, npm, Go, Cargo, Rustup, Git and
   static downloads at the Gateway.
 - [Operator guide](docs/operator-guide.md): S3, proxies, source policy, deployment,
   observability and day-to-day maintenance.
@@ -217,6 +223,8 @@ dependency-gateway-prepare <command> --help
   scripts, and unresolvable variables may need manual complements.
 - `dependency-gateway-prepare` does not modify the original dataset and is not responsible for the
   final task image build.
+- Conda channels support traditional colocated repodata/packages; sharded indexes and
+  metadata download-URL rewriting are not supported. Installers are separate downloads.
 
 ## Development
 

@@ -12,9 +12,14 @@ TYPE_CHECKING and do not import gateway runtime types.
   `KIND_HANDLERS` / `ECOSYSTEM_HANDLERS` indexes in one pass; exports `handler_for_kind`,
   `handler_for_ecosystem`, and the convenience functions `always_publish(source)`,
   `display_name(source, request_url)`.
-- `pip.py` / `node.py` / `go.py` / `cargo.py` / `dart.py` / `julia.py` /
+- `pip.py` / `node.py` / `go.py` / `cargo.py` / `conda.py` / `dart.py` / `julia.py` /
   `download.py` / `apt.py`: all hooks for each ecosystem; each file ends by exporting a single
   `HANDLER = EcosystemHandler(...)` constant (no register side effects).
+- `conda.py` admits traditional repodata, channel metadata and versioned package filenames;
+  it classifies inventory by package/version/platform (normalized tags such as `linux_64`).
+  Source prefixes constrain channels
+  and platforms; `SourceConfig.freshness_ttl` uses the metadata classifier to keep packages
+  immutable independently of their content type or configured mutable prefixes.
 - `_origin.py`: the `_origin` pure function (re-exported here from `config/_shared.py`).
 
 ## Hook reference

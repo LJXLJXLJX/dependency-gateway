@@ -135,6 +135,8 @@ def write_probe_report(directory: Path, report: dict[str, object]) -> None:
         "sha256",
         "integrity",
         "shasum",
+        "md5",
+        "resolution_options",
         "size",
         "elapsed_seconds",
         "bytes_sampled",
@@ -161,6 +163,9 @@ def write_probe_report(directory: Path, report: dict[str, object]) -> None:
                 output["consumer_environment_ids"] = json.dumps(
                     output.get("consumer_environment_ids", []),
                     ensure_ascii=False,
+                )
+                output["resolution_options"] = json.dumps(
+                    output.get("resolution_options"), ensure_ascii=False
                 )
                 writer.writerow(output)
 

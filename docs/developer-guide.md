@@ -53,7 +53,7 @@ Changes that touch the HTTP server, Git Smart HTTP, Range, S3 storage, or the so
 | `gateway/services/image.py` | OCI plans, target filtering, and Skopeo execution |
 | `gateway/services/apt.py` | Compiling APT candidates into Gateway sources |
 | `harbor_tasks/preparer/direct_download/` | Static URL review, plans, pre-heating, and refresh |
-| `harbor_tasks/preparer/providers/` | APT, pip, and npm resolution environments, probes, and pre-heating |
+| `harbor_tasks/preparer/providers/` | APT, pip, npm, and conda resolution environments, probes, and pre-heating |
 
 Tests are organized around four primary boundaries: Gateway/config, S3, Git mirror, and dataset preparation.
 

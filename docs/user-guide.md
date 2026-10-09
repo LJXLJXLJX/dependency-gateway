@@ -77,6 +77,60 @@ python -m pip install \
 
 `sgl_deep_gemm` and `sgl_deep_ep` use the same `sglang-wheel-files` route. Release wheels are treated as immutable download caches, but deploying a source config does not by itself pre-heat objects.
 
+## Conda channels
+
+After deploying the updated source manifest, these channel roots are available:
+
+| Channel | URL |
+| --- | --- |
+| defaults: main | `${DEPENDENCY_GATEWAY_URL}/conda-defaults/main` |
+| defaults: r | `${DEPENDENCY_GATEWAY_URL}/conda-defaults/r` |
+| conda-forge | `${DEPENDENCY_GATEWAY_URL}/conda-channels/conda-forge` |
+
+`DEPENDENCY_GATEWAY_URL` is the platform-provided `/v1/cache` root without a trailing slash.
+The bundled manifest admits `linux-64` and `noarch` for these channels; other channels,
+labels and platforms require a reviewed source-config change.
+
+Set the following transport mappings in your `.condarc`, preserving the task's existing
+`channels` list, channel order, package versions and solver settings:
+
+```yaml
+default_channels:
+  - ${DEPENDENCY_GATEWAY_URL}/conda-defaults/main
+  - ${DEPENDENCY_GATEWAY_URL}/conda-defaults/r
+channel_alias: ${DEPENDENCY_GATEWAY_URL}/conda-channels
+custom_channels:
+  conda-forge: ${DEPENDENCY_GATEWAY_URL}/conda-channels
+repodata_use_shards: false
+```
+
+Conda expands environment variables in these channel settings. The `custom_channels`
+value is the parent URL; conda appends the key (`conda-forge`) itself. Replace any existing
+public mapping for an admitted channel with the corresponding Gateway mapping. Explicit
+channel URLs in commands, environment files and lockfiles also need to point at the Gateway;
+setting `channel_alias` only affects channel names such as `-c conda-forge`.
+
+For example, after setting the configuration:
+
+```bash
+: "${DEPENDENCY_GATEWAY_URL:?DEPENDENCY_GATEWAY_URL is required}"
+conda create -p /tmp/conda-gateway-smoke --override-channels -c conda-forge python=3.12
+```
+
+The adapter serves traditional `repodata.json`, `current_repodata.json`, their `.bz2`/`.zst`
+variants, `repodata.jlap`, channel notices and channeldata, plus `.conda`/`.tar.bz2` packages.
+Metadata uses the source's 300-second TTL; versioned packages remain immutable. Bytes and
+package checksums are preserved. The source still follows the server's `proxy-only` or `all`
+cache policy: domestic direct success can be `BYPASS` under `proxy-only`.
+
+Sharded repodata is outside this adapter's admission policy; disable it on clients that
+support it. Metadata is served without URL rewriting, so CEP-15 `base_url` fields pointing
+packages at a different location are not remapped. Mamba/micromamba client configuration
+and optional repodata features must be checked for the version being used. Miniconda,
+Miniforge and micromamba installers are separate downloads and are not channel objects.
+The preparer can resolve and warm declared conda spec sets using a preloaded micromamba
+resolver image; see the [dataset preparation guide](dataset-preparation.md#conda-preparation).
+
 ## npm
 
 Specify the Registry once:

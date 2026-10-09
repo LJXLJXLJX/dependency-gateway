@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 from typing import Iterator, Sequence
 
+from .conda import conda_arguments
 from .dockerfile import read_text
 from .external import sanitize_public_url
 from .models import (
@@ -129,6 +130,11 @@ def identify_install(tokens: Sequence[str]) -> Install | None:
             return Install("pip", tuple(rest[2:]), "uv pip install")
         if rest[:1] == ["add"]:
             return Install("uv", tuple(rest[1:]), "uv add")
+    if executable in {"conda", "mamba", "micromamba"}:
+        if rest[:2] in (["env", "create"], ["env", "update"]):
+            return Install("conda", tuple(rest[2:]), f"{executable} env {rest[1]}")
+        if rest and rest[0] in {"install", "create"}:
+            return Install("conda", tuple(rest[1:]), f"{executable} {rest[0]}")
     command_map = {
         "apt": ({"install"}, "apt"), "apt-get": ({"install"}, "apt"),
         "apk": ({"add"}, "apk"), "dnf": ({"install"}, "dnf"),
@@ -179,6 +185,9 @@ OPTION_VALUES = {
 
 
 def argument_specs(install: Install) -> tuple[list[str], list[str]]:
+    if install.manager == "conda":
+        specs, files, _options = conda_arguments(install)
+        return specs, files
     specs: list[str] = []
     requirements: list[str] = []
     args = list(install.arguments)
@@ -292,6 +301,8 @@ def npm_resolution_options(install: Install) -> dict[str, object]:
 
 
 def package_resolution_options(install: Install) -> dict[str, object]:
+    if install.manager == "conda":
+        return conda_arguments(install)[2]
     if install.manager == "pip":
         return pip_resolution_options(install)
     if install.manager in NODE_REGISTRY_MANAGERS:
@@ -308,7 +319,10 @@ def normalize_package(manager: str, spec: str) -> str | None:
             return None
         name = re.split(r"[<>=!~;\[]", spec, maxsplit=1)[0]
         name = re.sub(r"[-_.]+", "-", name).lower()
-    elif manager in {"apt", "apk", "dnf", "yum", "zypper", "pacman", "conda"}:
+    elif manager == "conda":
+        match = re.match(r"^[A-Za-z0-9_][A-Za-z0-9_.-]*", spec.rsplit("::", 1)[-1])
+        return match.group().lower() if match else None
+    elif manager in {"apt", "apk", "dnf", "yum", "zypper", "pacman"}:
         name = re.split(r"[<>=!~]", spec, maxsplit=1)[0].lower()
         name = re.sub(r":[A-Za-z0-9_-]+$", "", name)
     elif manager in {"npm", "pnpm", "yarn", "bun"}:

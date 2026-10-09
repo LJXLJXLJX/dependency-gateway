@@ -18,7 +18,7 @@ dependency-gateway/
 ├── .dockerignore / .gitignore    # Exclusion rules for Docker builds and Git
 │
 ├── config/                       # Server-side source configuration (see the directory README)
-│   └── sources.json              #   Source manifest: upstream/validation/publish policy across 9 ecosystems and 13 kinds
+│   └── sources.json              #   Source manifest: upstream/validation/publish policy across 10 ecosystems and 14 kinds
 │
 ├── deploy/                       # hosted-mode server deployment (see the directory README)
 │   ├── Dockerfile.hosted         #   Hosted image build (assembles the server on top of the base image)
@@ -56,6 +56,7 @@ dependency-gateway/
     │   │   ├── __init__.py       #     Aggregates the HANDLER constant, building the kind/ecosystem dual index once
     │   │   ├── _origin.py        #     _origin (re-exported here by config/_shared.py)
     │   │   ├── pip/node/go/cargo/dart/julia/download/apt.py  # All hooks per ecosystem + HANDLER constant
+    │   │   ├── conda.py          #     Traditional conda metadata/package path admission, metadata classifier and package inventory
     │   ├── source_naming.py      #   Source naming and route parsing (parse_*_route, frozen_download naming)
     │   ├── logging_utils.py      #   Logging initialization utilities
     │   └── local_env.py          #   Local environment probing
@@ -98,6 +99,7 @@ dependency-gateway/
     │   │   ├── apt.py            #     APT dependency and repository-declaration recognition
     │   │   ├── external.py       #     External build-input (URL/git clone) recognition
     │   │   ├── packages.py       #     Install-command recognition and option parsing
+    │   │   ├── conda.py          #     Static conda command/environment-file context, channel order, platforms and joint MatchSpecs
     │   │   ├── report.py         #     Markdown report and write_outputs persistence
     │   │   └── cli.py            #     parse_args/main (module docstring is the CLI description)
     │   └── preparer/             #   Preparation-plan generation and warm-up (formerly preparation/)
@@ -123,6 +125,7 @@ dependency-gateway/
     │           │   ├── environments.py / resolver.py / provider.py
     │           │   └── resolver_script.py
     │           ├── npm.py        #       npm provider (not yet packaged)
+    │           ├── conda.py      #       Joint micromamba dry-run resolution, domestic artifact probes and pinned Gateway warm-up
     │           └── npm_resolver.js  #    npm resolver script resource
     │
     ├── ui/                       # Operations web interface (mounted by server.py)

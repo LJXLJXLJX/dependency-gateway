@@ -1064,6 +1064,80 @@
       ],
       "config_updated_at": "2026-09-09",
       "config_update_policy": "manual"
+    },
+    {
+      "name": "conda-defaults",
+      "kind": "conda-channel",
+      "ecosystem": "conda",
+      "base_url": "https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/",
+      "allowed_redirect_origins": [],
+      "allowed_path_prefixes": [
+        "main/linux-64/",
+        "main/noarch/",
+        "r/linux-64/",
+        "r/noarch/"
+      ],
+      "allowed_exact_paths": [
+        "main/channeldata.json",
+        "main/notices.json",
+        "r/channeldata.json",
+        "r/notices.json"
+      ],
+      "metadata_ttl_seconds": 300,
+      "allow_query": false,
+      "proxy_mode": "direct",
+      "upstream_label": "tuna",
+      "attempt_timeout_seconds": 120,
+      "slow_after_seconds": 10,
+      "min_bytes_per_second": 65536,
+      "fallback_upstreams": [
+        {
+          "label": "anaconda-official",
+          "base_url": "https://repo.anaconda.com/pkgs/",
+          "proxy_mode": "configured",
+          "allowed_redirect_origins": [],
+          "attempt_timeout_seconds": 600,
+          "slow_after_seconds": 30,
+          "min_bytes_per_second": 65536
+        }
+      ],
+      "config_updated_at": "2026-10-09",
+      "config_update_policy": "manual"
+    },
+    {
+      "name": "conda-channels",
+      "kind": "conda-channel",
+      "ecosystem": "conda",
+      "base_url": "https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/",
+      "allowed_redirect_origins": [],
+      "allowed_path_prefixes": [
+        "conda-forge/linux-64/",
+        "conda-forge/noarch/"
+      ],
+      "allowed_exact_paths": [
+        "conda-forge/channeldata.json",
+        "conda-forge/notices.json"
+      ],
+      "metadata_ttl_seconds": 300,
+      "allow_query": false,
+      "proxy_mode": "direct",
+      "upstream_label": "tuna",
+      "attempt_timeout_seconds": 120,
+      "slow_after_seconds": 10,
+      "min_bytes_per_second": 65536,
+      "fallback_upstreams": [
+        {
+          "label": "anaconda-cloud",
+          "base_url": "https://conda.anaconda.org/",
+          "proxy_mode": "configured",
+          "allowed_redirect_origins": [],
+          "attempt_timeout_seconds": 600,
+          "slow_after_seconds": 30,
+          "min_bytes_per_second": 65536
+        }
+      ],
+      "config_updated_at": "2026-10-09",
+      "config_update_policy": "manual"
     }
   ]
 }

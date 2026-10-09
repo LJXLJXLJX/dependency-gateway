@@ -7,6 +7,10 @@ pytest test suite. You must run `pip3 install --user -e .` first (the package ma
   compatibility red lines).
 - `test_s3_storage.py`: S3Storage key computation and storage semantics (golden coverage).
 - `test_gateway.py`: gateway caching/publishing behavior.
+- `test_conda_gateway.py`: conda channel/path admission, metadata freshness, package
+  immutability, HTTP HEAD/Range, fallback/redirect policy, inventory and request statistics.
+- `test_conda_preparation.py`: conda analysis, joint dry-run solver commands, dependency
+  coverage, unsupported contexts, consumer attribution, checksum and Gateway HIT verification.
 - `test_git_mirror.py`: Git mirror behavior.
 - `test_dataset_preparation.py`: dataset analyzer / preparer tooling.
 - `test_extracted_resources.py`: sha256 snapshot guard for the resolver scripts and webui static

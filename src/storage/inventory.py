@@ -38,6 +38,7 @@ class CacheObject:
             "node",
             "go",
             "cargo",
+            "conda",
             "dart",
             "julia",
             "download",

@@ -21,6 +21,11 @@ Pipeline layers (dependency direction: `cli → each layer → models/shell`, or
   issue reporting.
 - `packages.py`: recognition of package-manager install commands (`identify_install`), option
   parsing, requirements expansion, and shell script collection.
+- `conda.py`: conda/mamba/micromamba install/create and environment-file context, ordered
+  channels, platform, joint MatchSpecs and version/build constraints. JSON, ordinary block-list
+  environment YAML and plain spec files are supported without a YAML library. Dynamic,
+  missing/ambiguous or complex files and task-local rc configuration remain explicit
+  unsupported contexts; no original task files are modified.
 - `report.py`: `markdown` report and `write_outputs` persistence (lazily imported by the
   preparer).
 - `cli.py`: `parse_args`/`main` + `__main__` guard (the module docstring is the CLI description).

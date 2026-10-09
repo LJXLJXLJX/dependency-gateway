@@ -49,7 +49,9 @@ dependency-gateway-prepare analyze \
   --shell-scope referenced
 ```
 
-By default it probes the domestic sources of the discovered APT, pip, and npm requirements. For a quick static inventory only:
+By default it probes the domestic sources of the discovered APT, pip, npm, and supported
+conda contexts. Conda resolution requires a preloaded resolver image as described below.
+For a quick static inventory only:
 
 ```bash
 dependency-gateway-prepare analyze \
@@ -73,7 +75,7 @@ Main files:
 | `summary.json` / `report.md` | Task, stage, dependency, and coverage summary |
 | `image-mirror-plan.json` | Plan from upstream OCI images to internal targets |
 | `image-mirror-selection.json` | Existing/missing target results after running mirror/prepare |
-| `package-probe-report.json` | Domestic-source probe results and consumption contexts for APT, pip, npm |
+| `package-probe-report.json` | Domestic-source probe results and consumption contexts for APT, pip, npm, conda |
 | `apt-cache-candidates.json` | Candidates requiring fixed third-party APT source/key/objects |
 | `apt-gateway-plan.json` | APT source plan that can be merged into the Gateway |
 | `external-build-inputs.json` | Explicit Git clone and curl/wget inventory |
@@ -89,9 +91,53 @@ Package resolution is at least affected by these dimensions:
 - base image / distribution / codename / architecture;
 - Python implementation, version, ABI, and wheel platform;
 - npm Registry and resolution options;
+- conda channel order/priority, platform, and the complete declared MatchSpec set;
 - the Dockerfile stage, and which stage references a script.
 
 Identical package names cannot be deduplicated by string alone. The tool first resolves within each resolution environment, then deduplicates by final artifact digest or URL while preserving all consumers.
+
+### Conda preparation
+
+The analyzer recognizes `conda`, `mamba` and `micromamba` install/create, plus env create/update.
+It retains joint package constraints, ordered channels, `--override-channels`,
+`--strict-channel-priority`, `--no-channel-priority`, `--no-deps`, and explicit platform
+selection. It reads ordinary block-list `environment.yml`, JSON environment documents and
+plain MatchSpec files from the task's build context. Nested pip dependencies are reported
+separately to the pip provider.
+
+Configure a reviewed micromamba image already present in the local Docker daemon:
+
+```bash
+export DEPENDENCY_GATEWAY_CONDA_RESOLVER_IMAGE="<preloaded-internal-micromamba-image>"
+```
+
+Image acquisition follows the platform's internal Registry mirror workflow. The preparer
+uses `docker run --pull never`, a read-only container filesystem and temporary `/tmp`,
+with proxy variables cleared. No task install script is executed. Micromamba runs
+`create --dry-run --json --no-rc --platform linux-64` against explicit channel URLs, resolving
+the declared spec set into a fresh prefix. The image must support these flags and traditional
+repodata and include a CA trust bundle for HTTPS sources; sharded indexes remain outside
+Gateway admission. Missing resolver configuration
+is reported as `unsupported`, rather than triggering an install or pull.
+
+Supported channels match the server manifest: defaults (`pkgs/main` and `pkgs/r`) and
+conda-forge, on `linux-64` with `noarch` dependencies. Standard conda defaults are appended
+unless overridden; Miniforge/Mambaforge images use conda-forge defaults, and micromamba
+requires a declared channel. `nodefaults` in an environment file disables appended defaults.
+Named and equivalent fixed official/TUNA URLs map to the same reviewed Gateway routes.
+
+Probes include resolved transitive dependencies. Slow/unavailable artifact rows retain their
+exact filename, version/build and SHA-256 or MD5. Warm-up reuses these pinned records and
+checks downloaded bytes against the digest, then requires a HEAD response of `HIT`.
+If domestic resolution failed before artifacts were determined, warm-up retries the whole
+declared spec set through Gateway and warms all resulting dependencies. An object returning
+`BYPASS`, or a checksum mismatch, is a failed warm-up. This preserves the existing server
+cache policy and does not mistake direct upstream success for a cache insert.
+
+Fresh-prefix resolution does not reconstruct packages already installed in a task image or
+its virtual-package/OS state. Complex YAML, explicit lockfiles, task-local `.condarc`/
+`.mambarc` or `conda config` changes, dynamic values, unsupported flags/channels/platforms,
+and ambiguous/missing files are reported explicitly. Original task files are untouched.
 
 ## 4. Review Checklist
 

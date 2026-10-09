@@ -7,6 +7,7 @@ from datetime import date
 from urllib.parse import unquote, urlsplit, urlunsplit
 
 from ..ecosystems import handler_for_kind
+from ..ecosystems.conda import is_conda_metadata
 from ..ecosystems.node import _NPM_PATH_COMPONENT
 from ..ecosystems.pip import (
     _PYTORCH_PACKAGE_INDEX,
@@ -28,6 +29,7 @@ _SOURCE_KINDS = {
     "apt-repository",
     "cargo-crates",
     "cargo-sparse",
+    "conda-channel",
     "dart-pub",
     "frozen-download",
     "transparent-download",
@@ -44,6 +46,7 @@ _SOURCE_ECOSYSTEMS = {
     "node",
     "go",
     "cargo",
+    "conda",
     "dart",
     "julia",
     "download",
@@ -490,6 +493,15 @@ class SourceConfig:
                 raise ConfigError("julia-pkg sources must explicitly allow registries")
             if metadata_ttl_seconds is None:
                 raise ConfigError("julia-pkg sources must configure metadata_ttl_seconds")
+        if kind == "conda-channel":
+            if ecosystem != "conda":
+                raise ConfigError("conda-channel sources must use the conda ecosystem")
+            if allow_query:
+                raise ConfigError("conda-channel sources must disallow query")
+            if not allowed_path_prefixes:
+                raise ConfigError("conda-channel sources must configure allowed_path_prefixes")
+            if metadata_ttl_seconds is None:
+                raise ConfigError("conda-channel sources must configure metadata_ttl_seconds")
         if kind == "pytorch-wheels":
             if ecosystem != "pip":
                 raise ConfigError("pytorch-wheels sources must use the pip ecosystem")
@@ -741,6 +753,8 @@ class SourceConfig:
         if self.kind == "transparent-download":
             return default_index_ttl_seconds
         decoded = unquote(relative_path).lstrip("/")
+        if self.kind == "conda-channel":
+            return self.metadata_ttl_seconds if is_conda_metadata(decoded) else None
         # A few reviewed third-party repositories (notably MongoDB) publish
         # versioned package blobs below dists/ instead of pool/.  The path is
         # still a package object, not mutable repository metadata.

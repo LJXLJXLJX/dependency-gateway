@@ -91,6 +91,8 @@ class ProbeResult:
     environment_id: str | None = None
     consumer_environment_ids: tuple[str, ...] = ()
     build_contexts: tuple[str, ...] = ()
+    md5: str | None = None
+    resolution_options: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)

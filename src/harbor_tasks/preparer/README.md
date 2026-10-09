@@ -12,6 +12,6 @@ Preparation-plan execution (the `preparation/` directory moved wholesale + `prep
 - `models.py`: probe/warm data models and `ProbeSettings`.
 - `orchestrator.py`: `probe_packages` / `warm_packages`.
 - `report.py`: probe/warm report writing.
-- `providers/`: apt/pip/npm package probe and warm-up providers (used only by the preparer).
+- `providers/`: apt/pip/npm/conda package probe and warm-up providers (used only by the preparer).
 - `direct_download/`: v1 exact-object and v2 frozen-origin download plans with cache
   refresh/warm-up.
