@@ -2823,6 +2823,29 @@ class GatewayIntegrationTest(unittest.TestCase):
         self.assertEqual(result["results"][0]["first_cache_state"], "MISS")
         self.assertEqual(result["results"][0]["verification_cache_state"], "HIT")
 
+    def test_download_warm_prefers_configured_fallback(self) -> None:
+        plan = {
+            "kind": "dependency-gateway-download-gateway-plan",
+            "dataset": "/dataset",
+            "rewrites": [
+                {
+                    "source": "fallback",
+                    "relative_path": "object",
+                    "gateway_path": "/v1/cache/fallback/object",
+                    "refresh_policy": "immutable",
+                }
+            ],
+        }
+        result = warm_downloads(
+            plan,
+            gateway_url=f"{self.origin}/v1/cache",
+            timeout_seconds=2,
+            concurrency=1,
+        )
+        self.assertEqual(result["summary"]["cached"], 1)
+        self.assertEqual(UpstreamHandler.counters.get("/primary/object", 0), 0)
+        self.assertEqual(UpstreamHandler.counters["/secondary/object"], 1)
+
     def test_invalid_range_returns_416(self) -> None:
         wheel_path = "/v1/cache/pytorch/whl/cpu/torch-1.0-cp310-cp310-manylinux_x86_64.whl"
         with self.request(wheel_path) as response:

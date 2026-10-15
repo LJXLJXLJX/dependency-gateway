@@ -54,7 +54,14 @@ def _warm_one(
     url = origin + gateway_path
     opener = build_opener(ProxyHandler({}))
     try:
-        with opener.open(Request(url, method="GET"), timeout=timeout_seconds) as response:
+        with opener.open(
+            Request(
+                url,
+                headers={"X-Dependency-Gateway-Prefer-Fallback": "1"},
+                method="GET",
+            ),
+            timeout=timeout_seconds,
+        ) as response:
             first_state = response.headers.get("X-Dependency-Gateway", "UNKNOWN")
             size = 0
             while True:
